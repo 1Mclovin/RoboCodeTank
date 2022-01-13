@@ -2,71 +2,65 @@
 
 ```
 package rlh;
-import robocode.*;
-import java.awt.Color;
+import java.awt. * ;
+import robocode.Robot;
+import robocode.ScannedRobotEvent;
+import robocode.util.Utils;
+import robocode. * ;
+import java.awt. * ;
+import static robocode.util.Utils.normalRelativeAngleDegrees;
 
-// API help : https://robocode.sourceforge.io/docs/robocode/robocode/Robot.html
+public class fnlbot extends AdvancedRobot {
+  public int num = 1;
+  public int rotation = 90;
+  public void run() {
 
-/**
- * CokeHead - a robot by (McLovin)
- */
-public class CokeHead extends Robot
-{
-	/**
-	 * run: CokeHead's default behavior
-	 */
-	public void run() {
-		// Initialization of the robot should be put here
+    setAdjustGunForRobotTurn(true);
+    
+    turnLeft(getHeading());
+    TacticalAvoidance();
+    while (num == 1) {
+      setAdjustRadarForRobotTurn(true);
+      turnRadarRight(360);
+    }
+  }
 
-		// After trying out your robot, try uncommenting the import at the top,
-		// and the next line:
+  public void TacticalAvoidance() {
+    ahead(150);
+  }
 
-		 setColors(Color.green,Color.red,Color.orange); // body,gun,radar
+  public void onHitWall(HitWallEvent event) {
+    turnLeft(rotation);
+  }
 
-		// Robot main loop
-		while(true) {
-			// Replace the next 4 lines with any behavior you would like
-			ahead(200);
-			turnGunRight(300);
-			back(100);
-			turnGunRight(300);
-		}
-	}
+  public void BulletHitEvent() {
+    TacticalAvoidance();
+  }
 
-	/**
-	 * onScannedRobot: What to do when you see another robot
-	 */
-	public void onScannedRobot(ScannedRobotEvent e) {
-		// Replace the next line with any behavior you would like
-		if (e.getDistance() < 150)
-		{
-			fire(3);
-		}
-		else
-		{
-			fire(1.5);
-		}
-		
-	}
+  public void onHitRobot(HitRobotEvent event) {
+    turnRight(180);
+    rotation = -1*90;
+    TacticalAvoidance();
+  }
 
-	/**
-	 * onHitByBullet: What to do when you're hit by a bullet
-	 */
-	public void onHitByBullet(HitByBulletEvent e) {
-		// Replace the next line with any behavior you would like
-		turnRight(150);
-		back(-25);
-	}
-	
-	/**
-	 * onHitWall: What to do when you hit a wall
-	 */
-	public void onHitWall(HitWallEvent e) {
-		// Replace the next line with any behavior you would like
-		turnLeft(360);
-		turnRight(80);
-		back(200);
-		back(-300);
-	}	
+  public void onScannedRobot(ScannedRobotEvent e) {
+    double absoluteBearing = getHeading() + e.getBearing();
+    double bearingFromGun = normalRelativeAngleDegrees(absoluteBearing - getGunHeading());
+    turnGunRight(bearingFromGun);
+    if (getGunHeat() == 0 && Math.abs(getGunTurnRemaining()) < 10) {
+    	  double distance = e.getDistance();
+    	  if(distance >= 400){
+          fire(1);
+        }
+        else if(distance < 400 && distance > 200){
+          fire(2);
+        }
+        else{
+          fire(3);
+        }
+    }
+    TacticalAvoidance();
+  }
+
 }
 ```
